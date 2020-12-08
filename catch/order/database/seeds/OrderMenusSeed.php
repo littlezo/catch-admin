@@ -28,9 +28,9 @@ class OrderMenusSeed extends Seeder
 
     protected function getPermissions()
     {
-       return array (
-  0 => 
-  array (
+        return array(
+  0 =>
+  array(
     'id' => 77,
     'permission_name' => '任务管理',
     'route' => '/trade/task',
@@ -50,10 +50,10 @@ class OrderMenusSeed extends Seeder
     'created_at' => 1606482068,
     'updated_at' => 1606482536,
     'deleted_at' => 0,
-    'children' => 
-    array (
-      0 => 
-      array (
+    'children' =>
+    array(
+      0 =>
+      array(
         'id' => 82,
         'permission_name' => '任务商品',
         'route' => '/trade/goods',
@@ -74,8 +74,8 @@ class OrderMenusSeed extends Seeder
         'updated_at' => 1606483860,
         'deleted_at' => 0,
       ),
-      1 => 
-      array (
+      1 =>
+      array(
         'id' => 83,
         'permission_name' => '任务订单',
         'route' => '/trade/order',

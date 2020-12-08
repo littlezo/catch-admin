@@ -5,6 +5,7 @@ namespace catchAdmin\order\model;
 use catcher\base\CatchModel as Model;
 use catcher\traits\db\BaseOptionsTrait;
 use catcher\traits\db\ScopeTrait;
+
 // 数据库字段映射
 class TradeOrder extends Model
 {

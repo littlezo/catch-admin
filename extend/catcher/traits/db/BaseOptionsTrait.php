@@ -47,18 +47,24 @@ trait BaseOptionsTrait
             $item = explode('|', $field['comment']);
             $items[] = count($item);
             $type = 'text';
-            if (strpos($field['type'], 'char') !== false || strpos($field['type'], 'text') !== false)
+            if (strpos($field['type'], 'char') !== false || strpos($field['type'], 'text') !== false) {
                 $type = 'input';
-            if (strpos($field['name'], '_time') !== false)
+            }
+            if (strpos($field['name'], '_time') !== false) {
                 $type = 'date';
-            if (strpos($field['name'], '_img') !== false)
+            }
+            if (strpos($field['name'], '_img') !== false) {
                 $type = 'upload-image';
-            if ($field['name'] == "id" || strpos($field['name'], '_at') !== false || strpos($field['type'], 'decimal') !== false)
+            }
+            if ($field['name'] == "id" || strpos($field['name'], '_at') !== false || strpos($field['type'], 'decimal') !== false) {
                 $type = 'text';
-            if (strpos($field['name'], 'password_safety') !== false)
+            }
+            if (strpos($field['name'], 'password_safety') !== false) {
                 continue;
-            if (strpos($field['name'], 'status') !== false || strpos($field['name'], 'is_') !== false)
+            }
+            if (strpos($field['name'], 'status') !== false || strpos($field['name'], 'is_') !== false) {
                 $type = 'switch';
+            }
             if (count($item) >= 2) {
                 if (isset($item[1]) && !is_empty($item[1])) {
                     $table[$field['name']] = [

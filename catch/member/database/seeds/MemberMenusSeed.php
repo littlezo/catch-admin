@@ -28,9 +28,9 @@ class MemberMenusSeed extends Seeder
 
     protected function getPermissions()
     {
-       return array (
-  0 => 
-  array (
+        return array(
+  0 =>
+  array(
     'id' => 78,
     'permission_name' => '会员管理',
     'route' => '/member',
@@ -50,10 +50,10 @@ class MemberMenusSeed extends Seeder
     'created_at' => 1606482172,
     'updated_at' => 1606482427,
     'deleted_at' => 0,
-    'children' => 
-    array (
-      0 => 
-      array (
+    'children' =>
+    array(
+      0 =>
+      array(
         'id' => 84,
         'permission_name' => '会员管理',
         'route' => '/member/member',
@@ -74,8 +74,8 @@ class MemberMenusSeed extends Seeder
         'updated_at' => 1606567162,
         'deleted_at' => 0,
       ),
-      1 => 
-      array (
+      1 =>
+      array(
         'id' => 85,
         'permission_name' => '会员等级',
         'route' => '/member/level',
@@ -96,8 +96,8 @@ class MemberMenusSeed extends Seeder
         'updated_at' => 1606486532,
         'deleted_at' => 0,
       ),
-      2 => 
-      array (
+      2 =>
+      array(
         'id' => 89,
         'permission_name' => '内部会员',
         'route' => '/member/insid',
@@ -118,8 +118,8 @@ class MemberMenusSeed extends Seeder
         'updated_at' => 1606567146,
         'deleted_at' => 0,
       ),
-      3 => 
-      array (
+      3 =>
+      array(
         'id' => 90,
         'permission_name' => '站内消息',
         'route' => '/member/message',
@@ -140,8 +140,8 @@ class MemberMenusSeed extends Seeder
         'updated_at' => 1606484309,
         'deleted_at' => 0,
       ),
-      4 => 
-      array (
+      4 =>
+      array(
         'id' => 92,
         'permission_name' => '会员结构',
         'route' => '/member/tree',

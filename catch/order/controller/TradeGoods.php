@@ -19,7 +19,7 @@ class TradeGoods extends CatchController
     /**
      * 布局
      * @time 2020年11月30日 21:02
-     * @param Request $request 
+     * @param Request $request
      */
     public function layout(Request $request) : \think\Response
     {
@@ -29,7 +29,7 @@ class TradeGoods extends CatchController
     /**
      * 列表
      * @time 2020年11月30日 21:02
-     * @param Request $request 
+     * @param Request $request
      */
     public function index(Request $request) : \think\Response
     {
@@ -39,7 +39,7 @@ class TradeGoods extends CatchController
     /**
      * 保存信息
      * @time 2020年11月30日 21:02
-     * @param Request $request 
+     * @param Request $request
      */
     public function save(Request $request) : \think\Response
     {
@@ -49,7 +49,7 @@ class TradeGoods extends CatchController
     /**
      * 读取
      * @time 2020年11月30日 21:02
-     * @param $id 
+     * @param $id
      */
     public function read($id) : \think\Response
     {
@@ -59,7 +59,7 @@ class TradeGoods extends CatchController
     /**
      * 更新
      * @time 2020年11月30日 21:02
-     * @param Request $request 
+     * @param Request $request
      * @param $id
      */
     public function update(Request $request, $id) : \think\Response

@@ -73,8 +73,9 @@ class Member extends CatchController
      */
     public function update(Request $request, $id): \think\Response
     {
-        if (empty($this->allow_field))
+        if (empty($this->allow_field)) {
             return CatchResponse::success(empty($this->allow_field), '222');
+        }
         // return json($this->allow_field);
         $data = $request->only($this->allow_field);
         // return json($id);
