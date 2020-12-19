@@ -55,7 +55,7 @@ return [
             // 会员认证
             'member' => [
                 'driver' => 'jwt',
-                'provider' => 'member',
+                'provider' => 'member_user',
             ],
         ],
         // 服务提供
@@ -71,9 +71,9 @@ return [
                 'model' => \catchAdmin\system\model\Developers::class
             ],
             // 会员认证认证服务
-            'member' => [
+            'member_user' => [
                 'driver' => 'orm',
-                'model' => \catchAdmin\system\model\Developers::class
+                'model' => \app\model\Member::class
             ]
         ],
     ],

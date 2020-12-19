@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace catcher\base;
@@ -35,7 +36,6 @@ abstract class CatchModel extends \think\Model
     public const ENABLE = 1;
     // 禁用
     public const DISABLE = 2;
-
     /**
      * 是否有 field
      *
@@ -46,5 +46,23 @@ abstract class CatchModel extends \think\Model
     public function hasField(string $field)
     {
         return property_exists($this, 'field') ? in_array($field, $this->field) : false;
+    }
+
+    /**
+     * 更新事件
+     */
+    public static function onBeforeUpdate($data)
+    {
+        $fields =  self::getFields();
+        $allow_field = [];
+        foreach ($fields as $field) {
+            $item = explode('|', $field['comment']);
+            if (isset($item[3]) && $item[3] == 'false') {
+                $allow_field[] =  $field['name'];
+            }
+        }
+        if (!is_empty($allow_field)) {
+            $data->readonly($allow_field);
+        }
     }
 }

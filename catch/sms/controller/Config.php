@@ -11,7 +11,7 @@
 
 namespace catchAdmin\sms\controller;
 
-use catcher\base\CatchRequest as Request;
+use catchAdmin\sms\request\SmsRequest as Request;
 use catcher\CatchResponse;
 use catcher\base\CatchController;
 use catchAdmin\sms\model\SmsConfig as SmsConfigModel;
@@ -19,12 +19,12 @@ use catchAdmin\sms\model\SmsConfig as SmsConfigModel;
 class Config extends CatchController
 {
     protected $model;
-    
+
     public function __construct(SmsConfigModel $model)
     {
         $this->model = $model;
     }
-    
+
     /**
      * 列表
      *
@@ -36,7 +36,7 @@ class Config extends CatchController
     {
         return CatchResponse::paginate($this->model->getList());
     }
-    
+
     /**
      * 保存
      *
@@ -48,7 +48,7 @@ class Config extends CatchController
     {
         return CatchResponse::success($this->model->storeBy($request->param()));
     }
-    
+
     /**
      * 读取
      *
@@ -60,7 +60,7 @@ class Config extends CatchController
     {
         return CatchResponse::success($this->model->findBy($id));
     }
-    
+
     /**
      * 更新
      *
@@ -72,7 +72,7 @@ class Config extends CatchController
     {
         return CatchResponse::success($this->model->updateBy($id, $request->post()));
     }
-    
+
     /**
      * 删除
      *

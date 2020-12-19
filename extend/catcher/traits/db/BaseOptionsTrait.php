@@ -1,31 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace catcher\traits\db;
 
-use catcher\CatchModelCollection;
 use catcher\Utils;
 use think\Collection;
+use catcher\CatchModelCollection;
 
 trait BaseOptionsTrait
 {
-    /**
-     * 允许更新字段
-     *
-     * @return void
-     */
-    public function allow_field()
-    {
-        $fields =  $this->getFields();
-        $allow_field = [];
-        foreach ($fields as $field) {
-            $item = explode('|', $field['comment']);
-            if (isset($item[3]) && !is_empty($item[3])) {
-                $allow_field[] =  $field['name'];
-            }
-        }
-        return $allow_field;
-    }
+
     /**
      * 查询CURD布局
      *
@@ -34,72 +19,144 @@ trait BaseOptionsTrait
      */
     public function getLayout()
     {
+        // $reflectObj = new ReflectionClass('Member');
+        // $file_name = $reflectObj->getFileName();
+        // $file1 = glob('Member.php');
+        // var_dump($file_name);
+        // $model = app('\\app\\model\\' . 'Member');
+        // return json($model);
         $fields =  $this->getFields();
         $table = [];
-        $form = [];
+        $add_form = [];
         $edit_form = [];
-        $form_rules = [];
+        $add_rules = [];
         $edit_rules = [];
-        $topSearch = [];
+        $filter = [];
         $items = [];
-        // return  $fields;
+        // 正常
+        // 字段中文名|字段类型|行编辑|创建|更新|筛选
+        // 更新时间|data|false|false|false|false
+        // 关联查
+        // 字段中文名|关联类型|关联模型|关联外键|options字段 value,label
+        // 会员等级|hasOne|Level|id|id,level_title
         foreach ($fields as $field) {
             $item = explode('|', $field['comment']);
             $items[] = count($item);
-            $type = 'text';
-            if (strpos($field['type'], 'char') !== false || strpos($field['type'], 'text') !== false) {
-                $type = 'input';
-            }
-            if (strpos($field['name'], '_time') !== false) {
-                $type = 'date';
-            }
-            if (strpos($field['name'], '_img') !== false) {
-                $type = 'upload-image';
-            }
-            if ($field['name'] == "id" || strpos($field['name'], '_at') !== false || strpos($field['type'], 'decimal') !== false) {
-                $type = 'text';
-            }
-            if (strpos($field['name'], 'password_safety') !== false) {
+            if (count($item) === 1 || $item[1] == 'hide') {
                 continue;
             }
-            if (strpos($field['name'], 'status') !== false || strpos($field['name'], 'is_') !== false) {
-                $type = 'switch';
-            }
             if (count($item) >= 2) {
-                if (isset($item[1]) && !is_empty($item[1])) {
-                    $table[$field['name']] = [
+                // 表头
+                if (isset($item[2]) && !is_empty($item[2])) {
+                    if ($field['name'] == 'password' || $field['name'] == 'pay_password') {
+                        continue;
+                    }
+                    $array = [
                         'label' => $item[0],
                         'sortable' => true,
-                        'type' => $type,
+                        'type' => tableType($item[1]),
                     ];
+                    if ($item[1] == "hasOne" || $item[1] == "hasMany") {
+                        $class = '\\app\\model\\' . $item[6];
+                        $model = new  $class;
+                        $list = $model->field([$item[7], $item[8]])->select();
+                        $array['options'] = [];
+                        // $options_field = explode(',', $item[8]);
+                        foreach ($list as $val) {
+                            $array['options'][] = [
+                                'value' => $val[$item[7]],
+                                'text' => $val[$item[8]],
+                            ];
+                        }
+                    }
+                    if ($item[1] == "option") {
+                        $options_list = explode(',', $item[6]);
+                        foreach ($options_list as $val) {
+                            $options_field = explode(':', $val);
+                            $array['options'][] = [
+                                'value' => $options_field[0],
+                                'text' => $options_field[1],
+                            ];
+                        }
+                    }
+                    $table[$field['name']] = $array;
                 }
-                if (isset($item[2]) && !is_empty($item[2])) {
-                    $form[$field['name']] = [
+                // 增加表单
+                if (isset($item[3]) && !is_empty($item[3]) && $item[1] != 'read') {
+                    $array = [
                         'label' => $item[0],
-                        'type' => $type,
+                        'type' => formType($item[1]),
                     ];
-                    $form_rules[$field['name']] = [
+                    $add_rules[$field['name']] = [
                         'message' => $item[0],
-                        'required' => $field['notnull'],
+                        'required' => $item[1] == "pay_password" || $item[1] == "status" || $item[1] == "switch" || $item[1] == "yesno" ? false : $field['notnull'],
                     ];
+
+                    if ($item[1] == "hasOne" || $item[1] == "hasMany") {
+                        $class = '\\app\\model\\' . $item[6];
+                        $model = new  $class;
+                        $list = $model->field([$item[7], $item[8]])->select();
+                        $array['options'] = [];
+                        // $options_field = explode(',', $item[8]);
+                        foreach ($list as $val) {
+                            $array['options'][] = [
+                                'value' => $val[$item[7]],
+                                'text' => $val[$item[8]],
+                            ];
+                        }
+                    }
+
+                    // if (formType($item[1]) == "input") {
+                    //     $array['labelWidth'] = 200;
+                    // }
+                    $add_form[$field['name']] = $array;
                 }
-                if (isset($item[3]) && !is_empty($item[3])) {
-                    $edit_form[$field['name']] = [
+                // 修改表单
+                if (isset($item[4]) && !is_empty($item[4]) && $item[1] != 'read') {
+                    $array = [
                         'label' => $item[0],
-                        'type' => $type,
+                        'type' => formType($item[1]),
                     ];
                     $edit_rules[$field['name']] = [
                         'message' => $item[0],
-                        'required' => $field['notnull'],
+                        'required' => $item[1] == "password" || $item[1] == "pay_password" || $item[1] == "status" || $item[1] == "switch" || $item[1] == "yesno" ? false : $field['notnull'],
                     ];
+                    if ($item[1] == "hasOne" || $item[1] == "hasMany") {
+                        $class = '\\app\\model\\' . $item[6];
+                        $model = new  $class;
+                        $list = $model->field([$item[7], $item[8]])->select();
+                        $array['options'] = [];
+                        // $options_field = explode(',', $item[8]);
+                        foreach ($list as $val) {
+                            $array['options'][] = [
+                                'value' => $val[$item[7]],
+                                'text' => $val[$item[8]],
+                            ];
+                        }
+                    }
+                    $edit_form[$field['name']] = $array;
                 }
-                if (isset($item[4]) && !is_empty($item[4])) {
+                // 筛选
+                if (isset($item[5]) && !is_empty($item[5])) {
                     $array = [
-                        'text' =>    $item[0],
-                        'type' => $item[4],
+                        'label' =>    $item[0],
+                        'type' => filterType($item[1]),
                         'value' =>    $field['name'],
                     ];
-                    if ($item[4] == "select") {
+                    if ($item[1] == "hasOne" || $item[1] == "hasMany") {
+                        $class = '\\app\\model\\' . $item[6];
+                        $model = new  $class;
+                        $list = $model->field([$item[7], $item[8]])->select();
+                        $array['options'] = [];
+                        // $options_field = explode(',', $item[8]);
+                        foreach ($list as $val) {
+                            $array['options'][] = [
+                                'value' => $val[$item[7]],
+                                'text' => $val[$item[8]],
+                            ];
+                        }
+                    }
+                    if ($item[1] == "status" || $item[1] == "switch" || $item[1] == "yesno") {
                         $array['options'] = [
                             [
                                 'text' => "否",
@@ -112,19 +169,36 @@ trait BaseOptionsTrait
                             ]
                         ];
                     }
-                    $topSearch[] = $array;
+                    $filter[] = $array;
                 }
             }
         }
         $layout = [
-            'tableDesc' => $table,
-            'formDesc' => $form,
-            'editDesc' => $edit_form,
-            'formRules' => $form_rules,
-            'editRules' => $edit_rules,
-            'topButtons' => [],
-            'rightButtons' => [],
-            'topSearch' => $topSearch,
+            'filterRule' => $filter, // 筛选
+            'tableTabs' => [], // 头部菜单
+            'tableConfig' => [
+                'isShowTopDelete' => false,
+                'isShowRightDelete' => true,
+                'header' =>  $table
+            ], // 表头
+            'addConfig' => [
+                'inline' => true,
+                // 'isShowResetBtn' => true,
+                // 'isShowCancelBtn' => true,
+                'submitBtnText' => "提交",
+                'formDesc' => $add_form, // 新增数据字段
+                'rules' => $add_rules, // 验证规则
+            ], // 表格
+            'editConfig' => [
+                'inline' => true,
+                // 'isShowResetBtn' => true,
+                // 'isShowCancelBtn' => true,
+                'submitBtnText' => "提交",
+                'formDesc' => $edit_form, // 更新数据字段
+                'rules' => $edit_rules, // 验证规则
+            ], // 表格
+            'topOptions' => [], //头部操作
+            'rowActions' => [], // 行内操作
         ];
         return $layout;
     }
@@ -136,6 +210,9 @@ trait BaseOptionsTrait
      */
     public function getList()
     {
+        // ->catchJoin(Level::class, 'id', 'vip_level_id', ['level_title'])
+        // $fields =  $this->getFields();
+
         // 不分页
         if (property_exists($this, 'paginate') && $this->paginate === false) {
             return $this->catchSearch()
@@ -146,9 +223,12 @@ trait BaseOptionsTrait
         }
 
         // 分页列表
+        // return $this->catchJoin(\app\model\Level::class, 'id', 'min_vip_level', ['level_title']);
+
         return $this->catchSearch()
             ->field('*')
             ->catchOrder()
+            ->hasJoin()
             ->creator()
             ->paginate();
     }

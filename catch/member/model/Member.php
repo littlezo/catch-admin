@@ -81,10 +81,33 @@ class Member extends Model
      */
     public function getList()
     {
-        return $this->withoutField(['updated_at'], true)
+        return $this->withoutField(['password', 'pay_password'], true)
             ->catchSearch()
             ->catchJoin(Level::class, 'id', 'vip_level_id', ['level_title'])
             ->order($this->aliasField('id'), 'desc')
             ->paginate();
+    }
+
+    /**
+     * set password
+     *
+     * @time 2019年12月07日
+     * @param $value
+     * @return false|string
+     */
+    public function setPasswordAttr($value)
+    {
+        return password_hash($value, PASSWORD_ARGON2ID);
+    }
+    /**
+     * set uuid
+     *
+     * @time 2019年12月07日
+     * @param $data
+     * @return false|string
+     */
+    public static  function onBeforeInsert($data)
+    {
+        return password_hash($data, PASSWORD_ARGON2ID);
     }
 }

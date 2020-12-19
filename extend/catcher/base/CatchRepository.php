@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -10,9 +11,11 @@ declare(strict_types=1);
  * @copyright By CatchAdmin
  * @license  https://github.com/yanwenwu/catch-admin/blob/master/LICENSE.txt
  */
+
 namespace catcher\base;
 
 /**
+ * @method   getLayout()
  * @method   getList(array $data = [])
  * @method   storeBy(array $data)
  * @method   updateBy(int $id, array $data)
@@ -41,7 +44,7 @@ abstract class CatchRepository
     {
         // TODO: Implement __call() method.
         if (method_exists($this, 'model')) {
-            return call_user_func_array([$this->model(), $name], $arguments);//$this->model()->$name(...$arguments);
+            return call_user_func_array([$this->model(), $name], $arguments); //$this->model()->$name(...$arguments);
         }
 
         throw new \Exception(sprintf('Method %s Not Found~', $name));

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 namespace catchAdmin\sms\controller;
 
-use catcher\base\CatchRequest as Request;
+use catchAdmin\sms\request\SmsRequest as Request;
 use catcher\CatchResponse;
 use catcher\base\CatchController;
 use catchAdmin\sms\model\SmsTemplate as SmsTemplateModel;

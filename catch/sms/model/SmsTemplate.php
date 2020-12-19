@@ -33,4 +33,19 @@ class SmsTemplate extends Model
     ];
 
     protected $paginate = false;
+
+    /**
+     * 根据 name 查找
+     *
+     * @time 2020年09月16日
+     * @param $name
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @return array|\think\Model|null
+     */
+    public function findByName($identify)
+    {
+        return $this->where('identify', $identify)->value('code');
+    }
 }

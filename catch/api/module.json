@@ -1,0 +1,17 @@
+{
+    "name": "api",
+    "alias": "api",
+    "description": "api模块",
+    "version": "1.0.0",
+    "keywords": [
+        "api模块"
+    ],
+    "order": 0,
+    "services": [
+        "\\catchAdmin\\api\\apiService"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": [],
+    "enable": true
+}

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace catcher\base;
@@ -13,7 +14,7 @@ class CatchRequest extends Request
     /**
      * @var bool
      */
-    protected $needCreatorId = true;
+    protected $needCreatorId = false;
     /**
      *  批量验证
      *

@@ -2,18 +2,21 @@
 
 namespace catchAdmin\trade\controller;
 
-use catcher\base\CatchRequest as Request;
+use think\Request;
 use catcher\CatchResponse;
 use catcher\base\CatchController;
-use catchAdmin\trade\model\TradeConfig as tradeConfigModel;
+use app\model\TradeConfig as tradeConfigModel;
+use app\model\PayConfig;
 
 class TradeConfig extends CatchController
 {
-    protected $tradeConfigModel;
+    protected $configModel;
+    protected $payConfig;
 
-    public function __construct(TradeConfigModel $tradeConfigModel)
+    public function __construct(TradeConfigModel $configModel, PayConfig $payConfig)
     {
-        $this->tradeConfigModel = $tradeConfigModel;
+        $this->configModel = $configModel;
+        $this->payConfig = $payConfig;
     }
 
     /**
@@ -23,57 +26,86 @@ class TradeConfig extends CatchController
      */
     public function layout(Request $request): \think\Response
     {
-        return CatchResponse::success($this->tradeConfigModel->getLayout());
+        return CatchResponse::success($this->configModel->getLayout());
     }
 
     /**
-     * 列表
-     * @time 2020年11月30日 21:06
+     * 获取父级别配置
+     *
+     * @time 2020年04月17日
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @return Json
+     */
+    public function parent()
+    {
+        return CatchResponse::success($this->configModel->getParentConfig());
+    }
+
+    /**
+     * 存储配置
+     *
+     * @time 2020年04月17日
+     * @param $parent
      * @param Request $request
+     * @return Json
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
      */
-    public function index(Request $request): \think\Response
+    public function save(Request $request)
     {
-        return CatchResponse::paginate($this->tradeConfigModel->getList());
+        // , Request $request
+        // return CatchResponse::success($request->param());
+        return CatchResponse::success([
+            'id' => $this->configModel->storeBy($request->param()),
+            'parents' => $this->configModel->getParentConfig(),
+        ]);
     }
 
     /**
-     * 保存信息
-     * @time 2020年11月30日 21:06
-     * @param Request $request
+     * 获取配置
+     *
+     * @time 2020年04月20日
+     * @param $parent
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @return Json
      */
-    public function save(Request $request): \think\Response
+    public function read($parent)
     {
-        return CatchResponse::success($this->tradeConfigModel->storeBy($request->post()));
+        return CatchResponse::success($this->configModel->getConfig($parent));
     }
 
     /**
-     * 读取
-     * @time 2020年11月30日 21:06
-     * @param $id
+     * 存储支付配置
+     *
+     * @time 2020年04月17日
+     * @param \think\Request $request
+     * @return Json
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
      */
-    public function read($id): \think\Response
+    public function getHall(Request $request)
     {
-        return CatchResponse::success($this->tradeConfigModel->findBy($id));
+        return CatchResponse::success($this->tradeHallModel->getList());
     }
 
     /**
-     * 更新
-     * @time 2020年11月30日 21:06
-     * @param Request $request
-     * @param $id
+     * 获取配置
+     *
+     * @time 2020年04月20日
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @return Json
      */
-    public function update(Request $request, $id): \think\Response
+    public function payRead()
     {
-        return CatchResponse::success($this->tradeConfigModel->updateBy($id, $request->post()));
-    }
-
-    /**
-     * 删除
-     * @time 2020年11月30日 21:06
-     * @param $id
-     */
-    public function delete($id): \think\Response
-    {
-        return CatchResponse::success($this->tradeConfigModel->deleteBy($id));
+        return json(1231231);
+        return CatchResponse::success($this->payConfig->getConfig());
     }
 }

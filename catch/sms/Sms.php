@@ -11,6 +11,7 @@
 namespace catchAdmin\sms;
 
 use catchAdmin\sms\model\SmsConfig;
+use catchAdmin\sms\model\SmsTemplate;
 use catcher\exceptions\FailedException;
 use Overtrue\EasySms\EasySms;
 use think\helper\Str;
@@ -77,9 +78,10 @@ class Sms
      */
     public function send(string $phone, array $data)
     {
+
         try {
             $this->sendData['data'] = $data;
-
+            // return $this->config;
             return $this->easySms()
                 ->send($phone, $this->sendData);
         } catch (\Exception $exception) {
@@ -119,13 +121,16 @@ class Sms
      * 模版
      *
      * @time 2020年09月17日
-     * @param $template
+     * @param string $template
      * @param string $key
      * @return $this
      */
-    public function template($template, $key = 'template')
+    public function template($template = false, $key = 'template')
     {
-        $this->sendData[$key] = $template;
+        if ($template) {
+            $SmsTemplate = new SmsTemplate();
+            $this->sendData[$key] = $SmsTemplate->findByName($template);
+        }
 
         return $this;
     }
@@ -210,7 +215,7 @@ class Sms
         } else {
             $gateways = [$gateways];
         }
-
+        // return $gateways;
         $config = [
             'default' => [
                 'gateways' => $gateways,
@@ -219,7 +224,7 @@ class Sms
             'gateways' => static::getGatewaysConfig($gateways)
         ];
 
-
+        // return static::getGatewaysConfig($gateways);
         return new self($config);
     }
 }

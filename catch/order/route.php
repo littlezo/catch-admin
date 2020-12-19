@@ -12,9 +12,9 @@
 // you should use `$router`
 $router->group(function () use ($router) {
     // tradeGoods路由
-    $router->rule('trade/goods/layout', '\catchAdmin\order\controller\tradeGoods@layout');
-    $router->resource('trade/goods', '\catchAdmin\order\controller\tradeGoods');
+    $router->rule('trade/goods/layout', '\catchAdmin\order\controller\TradeGoods@layout');
+    $router->resource('trade/goods', '\catchAdmin\order\controller\TradeGoods');
     // tradeOrder路由
-    $router->rule('trade/order/layout', '\catchAdmin\order\controller\tradeOrder@layout');
-    $router->resource('trade/order', '\catchAdmin\order\controller\tradeOrder');
+    $router->rule('trade/order/layout', '\catchAdmin\order\controller\TradeOrder@layout');
+    $router->resource('trade/order', '\catchAdmin\order\controller\TradeOrder');
 })->middleware('auth');

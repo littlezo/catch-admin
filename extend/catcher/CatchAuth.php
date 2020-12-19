@@ -62,11 +62,9 @@ class CatchAuth
             if ($user->status == Users::DISABLE) {
                 throw new LoginFailedException('该用户已被禁用|' . $user->username, Code::USER_FORBIDDEN);
             }
-
             if (!password_verify($condition['password'], $user->password)) {
                 throw new LoginFailedException('登录失败|' . $user->username);
             }
-
             return $this->{$this->getDriver()}($user);
         } catch (\Exception $exception) {
             //

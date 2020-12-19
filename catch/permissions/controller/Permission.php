@@ -1,4 +1,5 @@
 <?php
+
 namespace catchAdmin\permissions\controller;
 
 use catcher\base\CatchRequest as Request;
@@ -37,11 +38,11 @@ class Permission extends CatchController
         // 获取按钮类型并且重新排列
         $buttonList = [];
         $this->permissions
-             ->whereIn('parent_id', array_unique($menuList->column('id')))
-             ->where('type', Permissions::BTN_TYPE)
-             ->select()->each(function ($item) use (&$buttonList) {
-                 $buttonList[$item['parent_id']][] = $item->toArray();
-             });
+            ->whereIn('parent_id', array_unique($menuList->column('id')))
+            ->where('type', Permissions::BTN_TYPE)
+            ->select()->each(function ($item) use (&$buttonList) {
+                $buttonList[$item['parent_id']][] = $item->toArray();
+            });
 
         // 子节点的 key
         $children = $request->param('actionList') ?? 'children';
@@ -77,7 +78,7 @@ class Permission extends CatchController
                     list($controller, $action) = explode('@', $parentPermission->permission_mark);
                     $permissionMark = $controller . '@' . $permissionMark;
                 } else {
-                    $permissionMark = $parentPermission->permission_mark .'@'. $permissionMark;
+                    $permissionMark = $parentPermission->permission_mark . '@' . $permissionMark;
                 }
             }
             $params['permission_mark'] = $permissionMark;
@@ -109,7 +110,7 @@ class Permission extends CatchController
                     list($controller, $action) = explode('@', $parentPermission->permission_mark);
                     $permissionMark = $controller . '@' . $permissionMark;
                 } else {
-                    $permissionMark = $parentPermission->permission_mark .'@'. $permissionMark;
+                    $permissionMark = $parentPermission->permission_mark . '@' . $permissionMark;
                 }
             }
 
@@ -194,6 +195,7 @@ class Permission extends CatchController
         $permission = Permissions::where('id', $id)->find();
         $module = $permission->module;
         $controller = explode('@', $permission->permission_mark)[0];
+        // return CatchResponse::success($parseClass->setModule('catch'));
 
         try {
             $methods = $parseClass->setModule('catch')->setRule($module, $controller)->onlySelfMethods();

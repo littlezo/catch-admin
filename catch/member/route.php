@@ -12,9 +12,18 @@
 // you should use `$router`
 $router->group(function () use ($router) {
     // member路由
-    $router->rule('/member/member/layout', '\catchAdmin\member\controller\Member@layout');
-    $router->resource('/member/member', '\catchAdmin\member\controller\Member');
+    $router->get('/member/members/layout', '\catchAdmin\member\controller\Member@layout');
+    $router->resource('/member/members', '\catchAdmin\member\controller\Member');
+    // member路由
+    $router->get('/member/inside/layout', '\catchAdmin\member\controller\Inside@layout');
+    $router->resource('/member/inside', '\catchAdmin\member\controller\Inside');
     // level路由
-    $router->rule('/member/level/layout', '\catchAdmin\member\controller\Level@layout');
+    $router->get('/member/level/layout', '\catchAdmin\member\controller\Level@layout');
     $router->resource('/member/level', '\catchAdmin\member\controller\Level');
+    // tree路由
+    $router->get('/member/tree/layout', '\catchAdmin\member\controller\Tree@layout');
+    $router->resource('/member/tree', '\catchAdmin\member\controller\Tree');
+    // message路由
+    $router->rule('/member/message/layout', '\catchAdmin\member\controller\Message@layout');
+    $router->resource('/member/message', '\catchAdmin\member\controller\Message');
 })->middleware('auth');

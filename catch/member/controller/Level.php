@@ -2,11 +2,10 @@
 
 namespace catchAdmin\member\controller;
 
-use think\facade\Db;
 use catcher\CatchResponse;
 use catcher\base\CatchController;
+use app\model\Level as levelModel;
 use catcher\base\CatchRequest as Request;
-use catchAdmin\member\model\Level as levelModel;
 
 class Level extends CatchController
 {
@@ -23,46 +22,14 @@ class Level extends CatchController
      */
     public function layout(): \think\Response
     {
-        $fields =  Db::getFields('task_member_vip');
-        $table = [];
-        $form = [];
-        $rules = [];
-        $topSearch = [];
-        foreach ($fields as $field) {
-            $item = json_decode($field['comment'], true);
-            if ($item) {
-                if (count($item) >= 1) {
-                    $table[$field['name']] = $item[0];
-                }
-                if (count($item) >= 2) {
-                    $form[$field['name']] = $item[1];
-                }
-                if (count($item) >= 3) {
-                    $rules[$field['name']] = $item[2];
-                }
-                $topSearch[] = [
-                    'text' =>    $item[0]['text'],
-                    'value' =>    $field['name'],
-                ];
-            }
-        }
-        $layout = [
-            'tableDesc' => $table,
-            'formDesc' => $form,
-            'formRules' => $rules,
-            'topButtons' => [],
-            'rightButtons' => [],
-            'topSearch' => $topSearch,
-            'topTime' => 'create_time',
-        ];
-        return CatchResponse::success($layout);
+        return CatchResponse::success($this->levelModel->getLayout());
     }
     /**
      * 列表
      * @time 2020年11月27日 06:13
      * @param Request $request
      */
-    public function index(Request $request): \think\Response
+    public function index(): \think\Response
     {
         return CatchResponse::paginate($this->levelModel->getList());
     }
