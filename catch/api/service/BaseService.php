@@ -40,7 +40,7 @@ class BaseService
         }
         Cache::store('redis')->set('local_' . $mobile, $code, 60);
         Cache::store('redis')->set('code_' . $mobile, $code, 300);
-        Cache::store('redis')->set('verify_' . $mobile, 6);
+        Cache::store('redis')->set('verify_' . $mobile, 6, 300);
         if (isset($aliyun['status']) && $aliyun['status'] === 'success') {
             return success(true, '发送成功，切勿泄露验证码给他人', 20000);
         }

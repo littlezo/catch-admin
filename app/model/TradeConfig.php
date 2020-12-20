@@ -25,6 +25,8 @@ class TradeConfig extends Model
         'key',
         // 配置值
         'value',
+        // 类型 0:input 1:image 2:file
+        'type',
         // 创建时间
         'created_at',
         // 更新时间
@@ -77,6 +79,7 @@ class TradeConfig extends Model
                         'pid' => $parentConfig['id'],
                         'key' => $key . '.' . $v['key'],
                         'value' => $v['value'],
+                        'type' => $v['type'],
                         'name' => $v['name'],
                         'created_at' => time(),
                         'updated_at' => time(),
@@ -156,7 +159,7 @@ class TradeConfig extends Model
     {
         $data = [];
         $configs = $this->where('pid', $this->where('component', $component)->value('id'))
-            ->field('id,`key` as k,name,value,pid')
+            ->field('id,`key` as k,name,value,type,pid')
             ->select();
 
         foreach ($configs as $config) {
@@ -165,13 +168,15 @@ class TradeConfig extends Model
                 $data[$object][$key]['key'] = $key;
                 $data[$object][$key]['value'] = $config['value'];
                 $data[$object][$key]['name'] = $config['name'];
+                $data[$object][$key]['type'] = $config['type'];
             } else {
                 $data[$config['k']] =  [
                     'id' =>  $config['id'],
                     'pid' =>  $config['pid'],
                     'key' =>  $config['k'],
                     'name' =>  $config['name'],
-                    'value' =>  $config['value']
+                    'value' =>  $config['value'],
+                    'type' => $config['type'],
                 ];
             }
         }
@@ -193,8 +198,15 @@ class TradeConfig extends Model
         $parent = $this->where('pid', 0)
             ->field(['id', 'name', 'component'])->select();
         $data = [];
-        foreach ($parent as $value) {
-            $data[$value['component']] = $this->getConfig($value['component']);
+        foreach ($parent as $list) {
+            if ($list['component'] == 'recharge') {
+                $data[$list['component']] = (array)$this->getConfig($list['component']);
+            } else {
+                $item = $this->getConfig($list['component']);
+                foreach ($item as $key => $value) {
+                    $data[$key] = (array)$value;
+                }
+            }
         }
         return $data;
     }
