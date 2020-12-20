@@ -2,6 +2,29 @@
 // 应用公共文件
 
 
+if (!function_exists('request')) {
+    /**
+     * 获取当前Request对象实例
+     * @return Request
+     */
+    function request(): \app\Request
+    {
+        return app('request');
+    }
+}
+if (!function_exists('getClientIp')) {
+    function getClientIp()
+    {
+        $forwarded = request()->header("x-forwarded-for");
+        if ($forwarded) {
+            $ip = explode(',', $forwarded)[0];
+        } else {
+            $ip = request()->ip();
+        }
+        return $ip;
+    }
+}
+
 /**
  * 成功的响应
  *
@@ -11,13 +34,15 @@
  * @param int $code
  * @return array
  */
-function success($data = [], $msg = 'success', $code = 200): array
-{
-    return ([
-        'code'    => $code,
-        'message' => $msg,
-        'data'    => $data,
-    ]);
+if (!function_exists('success')) {
+    function success($data = [], $msg = 'success', $code = 200): array
+    {
+        return ([
+            'code'    => $code,
+            'message' => $msg,
+            'data'    => $data,
+        ]);
+    }
 }
 /**
  * 错误的响应
@@ -27,64 +52,76 @@ function success($data = [], $msg = 'success', $code = 200): array
  * @param int $code
  * @return array
  */
-function fail($msg = '', $code = 40003): array
-{
-    return ([
-        'code' => $code,
-        'message'  => $msg,
-    ]);
-}
-function is_empty($value)
-{
-    if ($value == '') {
-        return true;
-    }
-    if ($value == "") {
-        return true;
-    }
-    if ($value == null) {
-        return true;
-    }
-    if ($value == false) {
-        return true;
-    }
-    if ($value == "false") {
-        return true;
-    }
-    if ($value == 'false') {
-        return true;
-    }
-    if (empty($value)) {
-        return true;
-    }
-    if (isset($value) == false) {
-        return true;
-    }
-    if ($value == ' ') {
-        return true;
-    }
-    if ($value == " ") {
-        return true;
-    }
-    if ($value == "[]") {
-        return true;
-    }
-    if ($value == "()") {
-        return true;
-    }
-    if ($value == "{}") {
-        return true;
-    }
-    return false;
-}
-if (!function_exists('request')) {
-    /**
-     * 获取当前Request对象实例
-     * @return Request
-     */
-    function request(): \app\Request
+if (!function_exists('fail')) {
+    function fail($msg = '', $code = 40003): array
     {
-        return app('request');
+        return ([
+            'code' => $code,
+            'message'  => $msg,
+        ]);
+    }
+}
+if (!function_exists('is_mobile')) {
+    function is_mobile($mobile)
+    {
+        return preg_match("/^1[3-9]\d{9}$/", $mobile);
+    }
+}
+if (!function_exists('is_qq')) {
+    function is_qq($qq)
+    {
+        return preg_match("/^[1-9]\d{4,10}$/", $qq);
+    }
+}
+if (!function_exists('is_password')) {
+    function is_password($password)
+    {
+        return preg_match("/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]+\S{5,32}$/", $password);
+    }
+}
+if (!function_exists('is_empty')) {
+    function is_empty($value)
+    {
+        if ($value == '') {
+            return true;
+        }
+        if ($value == "") {
+            return true;
+        }
+        if ($value == null) {
+            return true;
+        }
+        if ($value == false) {
+            return true;
+        }
+        if ($value == "false") {
+            return true;
+        }
+        if ($value == 'false') {
+            return true;
+        }
+        if (empty($value)) {
+            return true;
+        }
+        if (isset($value) == false) {
+            return true;
+        }
+        if ($value == ' ') {
+            return true;
+        }
+        if ($value == " ") {
+            return true;
+        }
+        if ($value == "[]") {
+            return true;
+        }
+        if ($value == "()") {
+            return true;
+        }
+        if ($value == "{}") {
+            return true;
+        }
+        return false;
     }
 }
 
