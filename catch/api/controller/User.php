@@ -5,6 +5,7 @@ namespace catchAdmin\api\controller;
 use catcher\Code;
 use app\model\Member;
 use catcher\CatchAuth;
+use app\model\TradeConfig;
 use catcher\CatchResponse;
 use thans\jwt\facade\JWTAuth;
 use catcher\base\CatchController;
@@ -87,9 +88,54 @@ class User extends CatchController
      * @time 2020年12月16日 17:21
      * @param Request $request 
      */
-    public function save(Request $request): \think\Response
+    public function register(Request $request): \think\Response
     {
-        return CatchResponse::success($this->model->storeBy($request->post()));
+        $data = $request->post();
+        if (isset($data['invite_code']) && is_empty($data['invite_code']) || mb_strlen($data['invite_code'], "utf-8") !== 8) {
+            return CatchResponse::fail("请输入正确的邀请码", 40003);
+        }
+        $inviter = $this->user->where('invite_code', $data['invite_code'])->find();
+        if (!$inviter) {
+            return CatchResponse::fail("推荐人不存在，请联系推荐人获取邀请码后重试", 40003);
+        }
+        if (isset($data['mobile']) && !is_mobile($data['mobile'])) {
+            return CatchResponse::fail("请输入正确的手机号", 40003);
+        } else {
+            if ($this->user->where('mobile', $data['mobile'])->value('id'))
+                return CatchResponse::fail("手机号已存在", 40003);
+        }
+
+        if (isset($data['nickname']) && is_empty($data['nickname']) || mb_strlen($data['nickname'], 'utf-8') < 3 || mb_strlen($data['nickname'], 'utf-8') > 10) {
+            return CatchResponse::fail("用户名不能为空，且长度在3-10位之间" . mb_strlen($data['nickname'], "utf-8"), 40003);
+        } else {
+            if ($this->user->where('nickname', $data['nickname'])->value('id'))
+                return CatchResponse::fail("用户名已存在", 40003);
+        }
+        $config = new TradeConfig;
+        $register_config = $config->getConfig('trade');
+        if (
+            isset($register_config['register']['force_qq']['value']) &&
+            (int)$register_config['register']['force_qq']['value'] &&
+            isset($data['qq']) && !is_qq($data['qq'])
+        ) {
+            return CatchResponse::fail("请输入QQ号", 40003);
+        }
+        if (isset($data['password']) && !is_password($data['password'])) {
+            return CatchResponse::fail("密码需同时含有字母和数字且以字母开头，长度在8-32之间", 40003);
+        }
+        if (isset($data['password_confirm']) && $data['password'] !== $data['password_confirm']) {
+            return CatchResponse::fail("两次输入密码不一致", 40003);
+        }
+        if (isset($data['verify_code']) && is_empty($data['verify_code'])) {
+            return CatchResponse::fail("请输入验证码", 40003);
+        }
+        $verify = $this->service->checkCode($data['mobile'], $data['verify_code']);
+        if ($verify['code'] !== 200) {
+            return CatchResponse::fail($verify['message'], $verify['code']);
+        }
+        $data['parent_id'] = $inviter['id'];
+        $data['register_ip'] = getClientIp();
+        return CatchResponse::success($this->user->register($data));
     }
 
     /**
@@ -140,15 +186,11 @@ class User extends CatchController
         ) {
             return CatchResponse::fail("参数错误缺少必要参数", 40003);
         }
-        // $verify = $this->service->checkCode($param['mobile'], $param['verify_code']);
-        // if ($verify['code'] !== 200) {
-        //     return CatchResponse::fail($verify['message'], $verify['code']);
-        // }
+        $verify = $this->service->checkCode($param['mobile'], $param['verify_code']);
+        if ($verify['code'] !== 200) {
+            return CatchResponse::fail($verify['message'], $verify['code']);
+        }
         $user_id = $this->user->where('mobile', $param['mobile'])->value('id');
-        // unset($param['confirm_password']);
-        // unset($param['verify_code']);
-        // $this->user->password    = $param['password'];
-        // return CatchResponse::success($param);
         if (is_empty($user_id))
             return CatchResponse::fail("用户不存在", 40003);
         return CatchResponse::success($this->user->updateBy($user_id, ['password' => $param['password']]), '修改成功', 20000);

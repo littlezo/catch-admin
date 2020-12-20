@@ -2,9 +2,10 @@
 
 namespace app\model;
 
+use think\helper\Str;
+use catcher\traits\db\ScopeTrait;
 use catcher\base\CatchModel as Model;
 use catcher\traits\db\BaseOptionsTrait;
-use catcher\traits\db\ScopeTrait;
 // 数据库字段映射
 class Member extends Model
 {
@@ -119,5 +120,19 @@ class Member extends Model
     {
         $data['uuid'] =  Str::upper(uuid_create(4));
         $data['invite_code'] = Str::random(8);
+    }
+
+    /**
+     * 用户注册
+     * @param array $data
+     * @return object
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     *
+     */
+    public function register($data)
+    {
+        return $this->storeBy($data);
     }
 }
