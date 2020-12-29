@@ -30,11 +30,14 @@ class CatchQuery extends Query
             }
             if ($item[1] == "hasOne" || $item[1] == "hasMany") {
                 $class = '\\app\\model\\' . $item[6];
-                $this->addSelectSub(function () use ($class, $item, $field) {
-                    $model = app($class);
-                    return $model->whereColumn($this->getTable() . '.' . $field['name'], $model->getTable() . '.' . $item[7])
-                        ->field($item[8]);
-                }, $item[8]);
+                $hasField = explode(",", $item[8]);
+                foreach ($hasField as $fieldItem) {
+                    $this->addSelectSub(function () use ($class, $item, $fieldItem, $field) {
+                        $model = app($class);
+                        return $model->whereColumn($this->getTable() . '.' . $field['name'], $model->getTable() . '.' . $item[7])
+                            ->field($fieldItem);
+                    }, $fieldItem);
+                }
             }
         }
         return $this;

@@ -55,12 +55,18 @@ class Member extends Model
         'is_inside',
         // 渠道|hide
         'channel',
-        // 真实名字|read|true|false|true
+        // 真实名字|read|true|false|false|true
         'real_name',
-        // 身份证号码|read|false|false|true
+        // 身份证号码|read|true|false|false|true
         'id_card',
-        // 收款资料ID|read|false|false|true
-        'collect_id',
+        // 银行名称|read|true|false|false|true
+        'bank_account',
+        // 收款账号|read|true|false|false|true
+        'bank_name',
+        // 开户行|read|true|false|false|true
+        'opening_bank',
+        // 开户地址|read|true|false|false|true
+        'opening_address',
         // 推荐人ID|read|true|false|true|true
         'parent_id',
         // 注册时间|datetime|true|false|false|false
@@ -120,6 +126,21 @@ class Member extends Model
     {
         $data['uuid'] =  Str::upper(uuid_create(4));
         $data['invite_code'] = Str::random(8);
+    }
+
+    /**
+     * 更新资料
+     * @time 2019年12月03日
+     * @param $id
+     * @param $data
+     * @param string $field
+     * @return array
+     */
+    public function updateByID($id, $data, $field = ''): array
+    {
+        $user = self::find($id);
+
+        return (array)$user;
     }
 
     /**

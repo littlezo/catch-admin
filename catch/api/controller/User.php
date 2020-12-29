@@ -8,6 +8,7 @@ use catcher\CatchAuth;
 use app\model\TradeConfig;
 use catcher\CatchResponse;
 use thans\jwt\facade\JWTAuth;
+use app\model\TradeWithdrawal;
 use catcher\base\CatchController;
 use catchAdmin\api\service\BaseService;
 use catcher\base\CatchRequest as Request;
@@ -16,17 +17,19 @@ class User extends CatchController
 {
     protected $user;
     protected $service;
+    protected $withdrawal;
 
-    public function __construct(BaseService $service, Member $user)
+    public function __construct(BaseService $service, Member $user, TradeWithdrawal $withdrawal)
     {
         $this->user = $user;
         $this->service = $service;
+        $this->withdrawal = $withdrawal;
     }
 
     /**
      * 登录
      * @time 2020年12月16日 17:21
-     * @param Request $request 
+     * @param Request $request
      */
     public function login(Request $request, CatchAuth $auth): \think\Response
     {
@@ -86,7 +89,7 @@ class User extends CatchController
     /**
      * 注册
      * @time 2020年12月16日 17:21
-     * @param Request $request 
+     * @param Request $request
      */
     public function register(Request $request): \think\Response
     {
@@ -126,8 +129,8 @@ class User extends CatchController
         if (isset($data['password_confirm']) && $data['password'] !== $data['password_confirm']) {
             return CatchResponse::fail("两次输入密码不一致", 40003);
         }
-        if (isset($data['verify_code']) && is_empty($data['verify_code'])) {
-            return CatchResponse::fail("请输入验证码", 40003);
+        if (isset($data['verify_code']) && !is_number_password($data['verify_code'])) {
+            return CatchResponse::fail("请输入验证码或验证码格式不正确", 40003);
         }
         $verify = $this->service->checkCode($data['mobile'], $data['verify_code']);
         if ($verify['code'] !== 200) {
@@ -153,8 +156,14 @@ class User extends CatchController
         try {
             $id = $auth->guard('member')->user()->id;
             // 用户数据权限
-            // return CatchResponse::success($id);
-            return CatchResponse::success($this->user->findBy($id));
+            $user = $this->user->findBy($id);
+            // 获取提现中金额
+            (float)$user['in_amount'] = $this->withdrawal->where('member_id', $user->id)->where('status', 0)->sum('money');
+            // 已提现
+            (float)$user['done_amount'] = $this->withdrawal->where('member_id', $user->id)->where('status', 1)->sum('money');
+            // 可提现金额
+            (float)$user['may_amount'] = (float)$user->balance_total - $user['in_amount'];
+            return CatchResponse::success($user);
         } catch (\Exception $exception) {
             return CatchResponse::success();
         }
@@ -163,12 +172,26 @@ class User extends CatchController
     /**
      * 修改个人资料
      * @time 2020年12月16日 17:21
-     * @param Request $request 
+     * @param Request $request
      * @param $id
      */
-    public function update(Request $request, $id): \think\Response
+    public function update(Request $request, CatchAuth $auth): \think\Response
     {
-        return CatchResponse::success($this->model->updateBy($id, $request->post()));
+        // 522423199612206319
+        $data = $request->post();
+        $user = $this->user->findBy($auth->guard('member')->user()->id);
+        if (!is_empty($user['real_name'])) {
+            unset($data['real_name']);
+        }
+        if (!is_empty($user['id_card'])) {
+            unset($data['id_card']);
+        }
+        if (isset($data['id_card']) && !is_empty($data['id_card'])) {
+            if ($this->user->where('id_card', $data['id_card'])->value('id')) {
+                return CatchResponse::fail("该用户已存在", 40003);
+            }
+        }
+        return CatchResponse::success($this->user->updateBy($user->id, $data));
     }
 
     /**
@@ -182,9 +205,19 @@ class User extends CatchController
         if (
             isset($param['mobile']) && is_empty($param['mobile']) ||
             isset($param['verify_code']) && is_empty($param['verify_code']) ||
-            isset($param['password']) && is_empty($param['password'])
+            isset($param['password']) && is_empty($param['password']) ||
+            isset($param['password_confirm']) && is_empty($param['password_confirm'])
         ) {
             return CatchResponse::fail("参数错误缺少必要参数", 40003);
+        }
+        if (!is_password($param['password'])) {
+            return CatchResponse::fail("密码需同时含有字母和数字且以字母开头，长度在8-32之间", 40003);
+        }
+        if ($param['password'] !== $param['password_confirm']) {
+            return CatchResponse::fail("两次输入密码不一致", 40003);
+        }
+        if (!is_number_password($param['verify_code'])) {
+            return CatchResponse::fail("请输入验证码或验证码格式不正确", 40003);
         }
         $verify = $this->service->checkCode($param['mobile'], $param['verify_code']);
         if ($verify['code'] !== 200) {
@@ -199,11 +232,74 @@ class User extends CatchController
     /**
      * 修改密码
      * @time 2020年12月16日 17:21
-     * @param Request $request 
+     * @param Request $request
      * @param string $id
      */
-    public function modifyPassword(Request $request, $type): \think\Response
+    public function modifyPassword(Request $request, CatchAuth $auth): \think\Response
     {
-        return CatchResponse::success($this->model->updateBy($type, $request->post()));
+        $param = $request->param();
+        // 验证必要参数
+        if (
+            isset($param['type']) && is_empty($param['type']) ||
+            isset($param['operate']) && is_empty($param['operate']) ||
+            isset($param['password']) && is_empty($param['password']) ||
+            isset($param['password_confirm']) && is_empty($param['password_confirm'])
+        ) {
+            return CatchResponse::fail("参数错误缺少必要参数", 40003);
+        }
+        if ($param['type'] == 'password') {
+            // 验证登录密码
+            if (!is_password($param['password'])) {
+                return CatchResponse::fail("登录密码需同时含有字母和数字且以字母开头，长度在8-32之间", 40003);
+            }
+        } else {
+            // 验证支付密码
+            if (!is_number_password($param['password'])) {
+                return CatchResponse::fail("支付密码只能是6位数字", 40003);
+            }
+        }
+        // 验证确认密码
+        if ($param['password'] !== $param['password_confirm']) {
+            return CatchResponse::fail("两次输入密码不一致", 40003);
+        }
+        // 查询用户信息
+        $user = $this->user->findBy($auth->guard('member')->user()->id);;
+        if ($param['operate'] == 'reset') {
+            // 验证手机号及验证码参数
+            if (
+                isset($param['mobile']) && is_empty($param['mobile']) ||
+                isset($param['verify_code']) && is_empty($param['verify_code'])
+            ) {
+                return CatchResponse::fail("参数错误缺少必要参数", 40003);
+            }
+            // 验证用户身份合法性
+            if ($user->mobile != $param['mobile']) {
+                return CatchResponse::fail("非法用户", 40003);
+            }
+            // 校验验证码
+            if (!is_number_password($param['verify_code'])) {
+                return CatchResponse::fail("请输入验证码或验证码格式不正确", 40003);
+            }
+            // 校验验证码是否合法
+            $verify = $this->service->checkCode($param['mobile'], $param['verify_code']);
+            if ($verify['code'] !== 200) {
+                return CatchResponse::fail($verify['message'], $verify['code']);
+            }
+        } else {
+            // 验证旧密码
+            if (
+                isset($param['old_password']) && is_empty($param['old_password'])
+            ) {
+                return CatchResponse::fail("参数错误缺少必要参数", 40003);
+            }
+            if (!password_verify($param['old_password'], $user[$param['type']])) {
+                return CatchResponse::fail('旧密码不正确', 40003);
+            }
+        }
+
+        $data = [
+            $param['type'] => $param['password'],
+        ];
+        return CatchResponse::success($this->user->updateBy($user->id, $data));
     }
 }

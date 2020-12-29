@@ -81,6 +81,6 @@ class Config extends CatchController
      */
     public function getHall(Request $request): \think\Response\Json
     {
-        return CatchResponse::success($this->hall->getHallConfig());
+        return CatchResponse::success($this->hall->getAppList());
     }
 }

@@ -5,25 +5,26 @@ namespace catchAdmin\api\controller;
 use catcher\base\CatchRequest as Request;
 use catcher\CatchResponse;
 use catcher\base\CatchController;
+use app\model\TradeGoods;
 
 class Goods extends CatchController
 {
     protected $model;
 
-    public function __construct()
+    public function __construct(TradeGoods $goods)
     {
+        $this->model = $goods;
     }
-
     /**
-     * 布局
+     * 列表
      * @time 2020年12月16日 17:21
      * @param Request $request 
      */
-    public function layout(Request $request): \think\Response
+    public function list(): \think\Response
     {
-        return CatchResponse::success($this->model->getLayout());
+        $this->model->paginate = false;
+        return CatchResponse::success($this->model->getAppList());
     }
-
     /**
      * 列表
      * @time 2020年12月16日 17:21

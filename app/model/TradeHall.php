@@ -39,11 +39,18 @@ class TradeHall extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\db\exception\DataNotFoundException
      */
-    public function getHallConfig()
+    public function getAppList()
     {
-        return $this->catchSearch()
+        $list = [];
+        $this->catchSearch()
             ->field('*')
             ->catchOrder('asc')
-            ->select();
+            ->select()->each(function ($item) use (&$list) {
+                unset($item['created_at']);
+                unset($item['creator_id']);
+                unset($item['deleted_at']);
+                $list[$item['id']] = $item;
+            });
+        return $list;
     }
 }

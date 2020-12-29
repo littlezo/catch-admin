@@ -46,4 +46,27 @@ class TradeGoods extends Model
         // 软删除
         'deleted_at',
     );
+
+    /**
+     * 获取APP列表
+     * @time 2020年04月17日
+     * @return \think\Collection
+     *@throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     */
+    public function getAppList()
+    {
+        $list = [];
+        $this->catchSearch()
+            ->field('*')
+            ->catchOrder('asc')
+            ->select()->each(function ($item) use (&$list) {
+                unset($item['created_at']);
+                unset($item['creator_id']);
+                unset($item['deleted_at']);
+                $list[$item['id']] = $item;
+            });
+        return $list;
+    }
 }

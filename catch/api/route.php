@@ -29,6 +29,7 @@ $router->group(function () use ($router) {
     $router->post('api/user/update', '\catchAdmin\api\controller\User@update');
     $router->post('api/user/modify', '\catchAdmin\api\controller\User@modifyPassword');
     // goods路由
+    $router->get('api/goods/list', '\catchAdmin\api\controller\Goods@list');
     $router->resource('api/goods', '\catchAdmin\api\controller\Goods');
     // order路由
     $router->resource('api/order', '\catchAdmin\api\controller\Order');
@@ -37,4 +38,10 @@ $router->group(function () use ($router) {
     // level路由
     $router->get('api/level/list', '\catchAdmin\api\controller\Level@index');
     $router->resource('api/level', '\catchAdmin\api\controller\Level');
+    // recharge路由
+    $router->resource('api/recharge', '\catchAdmin\api\controller\Recharge');
+    // withdrawal路由
+    $router->resource('api/withdrawal', '\catchAdmin\api\controller\Withdrawal');
+    // 文件上传
+    $router->post('api/upload/image', '\catchAdmin\system\controller\Upload@image');
 })->middleware(catchAdmin\api\middleware\AuthTokenMiddleware::class);
